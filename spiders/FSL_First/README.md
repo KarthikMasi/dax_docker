@@ -2,12 +2,12 @@
 
 1. sudo docker build ./
 2. docker run -t -i --privileged \<container id\>
-3. docker cp <path_to_matlab_iso.iso> <docker_container_id>:/home
-4. mount -o loop /home/<matlab.iso> /media
+3. docker cp \<path_to_matlab_iso.iso\> \<docker_container_id\>:/home
+4. mount -o loop /home/\<matlab.iso\> /media
 5. cp /media/activate.ini /home
 6. cp /media/installer_input.txt /home
 7. Retrieve license file from mathworks online
-8. docker cp <path_to_licence.lic> <container_id>:/home
+8. docker cp \<path_to_licence.lic\> \<container_id\>:/home
 9. vi /home/activate.ini
  1. Change line 66 to be activateCommand=activateOffline
  2. Change line 77 to licenseFile=/home/license.lic
