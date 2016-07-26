@@ -1,0 +1,1 @@
+xvfb-run -a /opt/MATLAB/R2016a/bin/matlab < /home/callFSL_FIRST.m
