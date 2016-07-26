@@ -1,7 +1,7 @@
 # Installation
 
 1. sudo docker build ./
-2. docker run -t -i --priveleged <container id>
+2. docker run -t -i --privileged \<container id\>
 3. docker cp <path_to_matlab_iso.iso> <docker_container_id>:/home
 4. mount -o loop /home/<matlab.iso> /media
 5. cp /media/activate.ini /home
