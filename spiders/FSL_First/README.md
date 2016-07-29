@@ -20,3 +20,10 @@
  5. Change line 120 to activationPropertiesFile=/home/license.lic
 11. /media/install -inputFile /home/installer_input.txt
 12. /opt/MATLAB/R2016a/bin/activate_matlab.sh -propertiesFile /home/activate.ini
+
+# Running
+Once MATLAB is installed, you should be able to run the following:
+docker run -ti --rm  -v \<path_to_save_outputs_on_host\>:/home/Output spiders/fsl_first:latest /opt/MATLAB/R2016a/bin/matlab \< /home/run.m
+
+If you want you can also link in the data from your host:
+docker run -ti --rm  -v \<path_to_save_outputs_on_host\>:/home/Output -v \<path_to_read_inputs_on_host\>:/home spiders/fsl_first:latest /opt/MATLAB/R2016a/bin/matlab \< /home/run.m
