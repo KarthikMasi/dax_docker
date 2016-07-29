@@ -11,7 +11,7 @@ wget -O- http://neuro.debian.net/lists/trusty.us-tn.full | tee /etc/apt/sources.
 apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9 && \
 apt-get update && \
 apt-get -y install fsl-5.0-complete
-COPY run /opt/run
+COPY code /home/code
 #Set to bash
 CMD ["bash"]
-# Now setup MATLAB using silent install
+# Now setup MATLAB using silent install see README.md
