@@ -27,3 +27,6 @@ docker run -ti --rm  -v \<path_to_save_outputs_on_host\>:/home/Output spiders/fs
 
 If you want you can also link in the data from your host:
 docker run -ti --rm  -v \<path_to_save_outputs_on_host\>:/home/Output -v \<path_to_read_inputs_on_host\>:/home spiders/fsl_first:latest /opt/MATLAB/R2016a/bin/matlab \< /home/run.m
+
+# MAC Address
+You may wish to also run with --mac-address \<MAC_ADDRESS\> if you are using a non-network license
