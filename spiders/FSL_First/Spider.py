@@ -1,6 +1,4 @@
 __author__ = 'damons'
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import subprocess
 import os,sys
@@ -35,6 +33,8 @@ def init(options):
     if not os.path.exists(Inputdir):
         os.makedirs(Inputdir)
     if options.offline:
+        if not os.path.isfile(options.scan):
+            sys.stderr.write("ERROR: %s does not exist" % options.scan)
         shutil.copyfile(arguments['filepath'], os.path.join(arguments['jobdir'],'Inputs', 'T1.nii.gz'))
         arguments['filepath'] = os.path.join(arguments['jobdir'],'Inputs', 'T1.nii.gz')
     else:
@@ -81,7 +81,6 @@ if __name__ == '__main__':
     XnatUtils.print_args(args)
     print 'INFO: Initialisation'
     arguments=init(args)
-
 
     if not os.path.isdir(arguments['jobdir']):
         os.makedirs(arguments['jobdir'])
