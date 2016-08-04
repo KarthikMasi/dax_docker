@@ -28,10 +28,24 @@ def init(options):
     arguments['session']=options.session
     arguments['scan']=options.scan
     arguments['jobdir'] = options.directory
+    arguments['suffix'] = options.suffix
 
-    Inputdir=os.path.join(arguments['jobdir'],'Inputs')
-    if not os.path.exists(Inputdir):
-        os.makedirs(Inputdir)
+    if not os.path.isdir(arguments['jobdir']):
+        os.makedirs(arguments['jobdir'])
+    else:
+        shutil.rmtree(arguments['jobdir'])
+        os.makedirs(arguments['jobdir'])
+    if not os.path.isdir(os.path.join(arguments['jobdir'],'Inputs')):
+        os.makedirs(os.path.join(arguments['jobdir'],'Inputs'))
+    else:
+        shutil.rmtree(os.path.join(arguments['jobdir'],'Inputs'))
+        os.makedirs(os.path.join(arguments['jobdir'],'Inputs'))
+    if not os.path.isdir(os.path.join(arguments['jobdir'],'Outputs')):
+        os.makedirs(os.path.join(arguments['jobdir'],'Outputs'))
+    else:
+        shutil.rmtree(os.path.join(arguments['jobdir'],'Outputs'))
+        os.makedirs(os.path.join(arguments['jobdir'],'Outputs'))
+    Inputdir = os.path.join(arguments['jobdir'],'Inputs')
     if options.offline:
         if not os.path.isfile(options.scan):
             sys.stderr.write("ERROR: %s does not exist" % options.scan)
@@ -43,21 +57,20 @@ def init(options):
         if not os.listdir(Inputdir):
             print 'ERROR: No Inputs downloaded.\n'
             sys.exit()
-        for niifiles in os.listdir(Inputdir):
-            if niifiles.endswith('.gz') or niifiles.endswith('.GZ'):
-                arguments['filepath']=os.path.join(Inputdir,niifiles)
+        niifile  = os.listdir(Inputdir)[0]
+        os.rename(os.path.join(Inputdir,niifile),os.path.join(Inputdir,'T1.nii.gz'))
 
     return arguments
 
-def run_FSL_First(filepath, jobdir, **kwargs):
+def run_FSL_First(jobdir,**kwargs):
     #print arguments:
-    res = subprocess.check_output('docker run --rm -ti --mac-address 02:42:ac:11:00:02 -v %s/Inputs:/home/Inputs -v %s/Outputs:/home/Output/ spiders/fsl_first:latest xvfb-run -a /opt/MATLAB/R2016a/bin/matlab \< /home/run.m ' %(jobdir,jobdir),stderr=subprocess.STDOUT)
-    print res
+    print 'docker run --rm -ti --mac-address 02:42:ac:11:00:02 -v %s/Inputs:/home/Inputs -v %s/Outputs:/home/Output/ spiders/fsl_first:latest xvfb-run -a /opt/MATLAB/R2016a/bin/matlab \< /home/run.m ' %(jobdir,jobdir)
+    os.system('docker run --rm -ti --mac-address 02:42:ac:11:00:02 -v %s/Inputs:/home/Inputs -v %s/Outputs:/home/Output/ spiders/fsl_first:latest xvfb-run -a /opt/MATLAB/R2016a/bin/matlab \< /home/run.m' %(jobdir,jobdir))
 
     print '===================================================================\n'
 
-def finish_FSL_First(script_name,suffix,project,subject,session,scan,jobdir,**kwargs):
-    EndOfSpider=SpiderProcessHandler('FSL_FIRST',suffix,project,subject,session,scan)
+def finish_FSL_First(suffix,project,subject,session,scan,jobdir,**kwargs):
+    EndOfSpider=SpiderProcessHandler('FSL_First',suffix,project,subject,session,scan)
     ### MATLAB Folder ###
     EndOfSpider.add_folder(os.path.join(jobdir,'MATLAB'))
     ### PDF ###
@@ -82,21 +95,7 @@ if __name__ == '__main__':
     print 'INFO: Initialisation'
     arguments=init(args)
 
-    if not os.path.isdir(arguments['jobdir']):
-        os.makedirs(arguments['jobdir'])
-    else:
-        shutil.rmtree(arguments['jobdir'])
-        os.makedirs(arguments['jobdir'])
-    if not os.path.isdir(os.path.join(arguments['jobdir'],'Inputs')):
-        os.makedirs(os.path.join(arguments['jobdir'],'Inputs'))
-    else:
-        shutil.rmtree(os.path.join(arguments['jobdir'],'Inputs'))
-        os.makedirs(os.path.join(arguments['jobdir'],'Inputs'))
-    if not os.path.isdir(os.path.join(arguments['jobdir'],'Outputs')):
-        os.makedirs(os.path.join(arguments['jobdir'],'Outputs'))
-    else:
-        shutil.rmtree(os.path.join(arguments['jobdir'],'Outputs'))
-        os.makedirs(os.path.join(arguments['jobdir'],'Outputs'))
+
 
     print 'INFO: Running FSL_First version 1.0.0'
     run_FSL_First(**arguments)
