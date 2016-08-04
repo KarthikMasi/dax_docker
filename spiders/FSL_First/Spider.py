@@ -2,6 +2,7 @@ __author__ = 'damons'
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import subprocess
 import os,sys
 from dax import XnatUtils,SpiderProcessHandler
 from datetime import datetime
@@ -20,19 +21,9 @@ def parse_args():
     ap.add_argument('--suffix', dest='suffix', help='assessor suffix. default: None', default=None)
     return ap.parse_args()
 
-def init_offline(options):
-    arguments={}
-    arguments['filepath']=options.scan
-    arguments['project']=options.project
-    arguments['subject']=options.subject
-    arguments['session']=options.session
-    arguments['scan']=options.scan
-    arguments['jobdir'] = options.directory
-    return arguments
-
-def init_xnat(options):
+def init(options):
         #init arguments:
-
+    arguments={}
     #XNAT:
     arguments['project']=options.project
     arguments['subject']=options.subject
@@ -42,26 +33,26 @@ def init_xnat(options):
 
     Inputdir=os.path.join(arguments['jobdir'],'Inputs')
     if not os.path.exists(Inputdir):
-        os.mkdir(Inputdir)
+        os.makedirs(Inputdir)
+    if options.offline:
+        shutil.copyfile(arguments['filepath'], os.path.join(arguments['jobdir'],'Inputs', 'T1.nii.gz'))
+        arguments['filepath'] = os.path.join(arguments['jobdir'],'Inputs', 'T1.nii.gz')
+    else:
+        XnatUtils.download_Scan(Inputdir,options.project,options.subject,options.session,options.scan,['NIFTI'])
 
-    XnatUtils.download_Scan(Inputdir,options.project,options.subject,options.session,options.scan,['NIFTI'])
-
-    if not os.listdir(Inputdir):
-        print 'ERROR: No Inputs downloaded.\n'
-        sys.exit()
-    for niifiles in os.listdir(Inputdir):
-        if niifiles.endswith('.gz') or niifiles.endswith('.GZ'):
-            arguments['filepath']=os.path.join(Inputdir,niifiles)
+        if not os.listdir(Inputdir):
+            print 'ERROR: No Inputs downloaded.\n'
+            sys.exit()
+        for niifiles in os.listdir(Inputdir):
+            if niifiles.endswith('.gz') or niifiles.endswith('.GZ'):
+                arguments['filepath']=os.path.join(Inputdir,niifiles)
 
     return arguments
 
 def run_FSL_First(filepath, jobdir, **kwargs):
     #print arguments:
-
-    cmd = 'fslreorient2std '+filepath+' '+filepath
-    os.system(cmd)
-
-    os.system('docker run -ti -v %s/Inputs:/home -v %s/Outputs:/tmp spiders/fsl_first:latest xvfb-run -a /opt/MATLAB/R2016a/bin/matlab \< /home/run.m' %(jobdir,jobdir))
+    res = subprocess.check_output('docker run --rm -ti --mac-address 02:42:ac:11:00:02 -v %s/Inputs:/home/Inputs -v %s/Outputs:/home/Output/ spiders/fsl_first:latest xvfb-run -a /opt/MATLAB/R2016a/bin/matlab \< /home/run.m ' %(jobdir,jobdir),stderr=subprocess.STDOUT)
+    print res
 
     print '===================================================================\n'
 
@@ -89,10 +80,8 @@ if __name__ == '__main__':
     print 'INFO: Arguments'
     XnatUtils.print_args(args)
     print 'INFO: Initialisation'
-    if args.offline:
-        arguments=init_offline(args)
-    else:
-        arguments = init_xnat(args)
+    arguments=init(args)
+
 
     if not os.path.isdir(arguments['jobdir']):
         os.makedirs(arguments['jobdir'])
@@ -109,9 +98,6 @@ if __name__ == '__main__':
     else:
         shutil.rmtree(os.path.join(arguments['jobdir'],'Outputs'))
         os.makedirs(os.path.join(arguments['jobdir'],'Outputs'))
-
-    shutil.move(arguments['filepath'], os.path.join(arguments['jobdir'],'Inputs', 'T1.nii.gz'))
-    arguments['filepath'] = os.path.join(arguments['jobdir'],'Inputs', 'T1.nii.gz')
 
     print 'INFO: Running FSL_First version 1.0.0'
     run_FSL_First(**arguments)
