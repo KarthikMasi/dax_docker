@@ -64,9 +64,7 @@ def init(options):
 
 def run_FSL_First(jobdir,**kwargs):
     #print arguments:
-    print 'docker run --rm -ti --mac-address 02:42:ac:11:00:02 -v %s/Inputs:/home/Inputs -v %s/Outputs:/home/Output/ spiders/fsl_first:latest xvfb-run -a /opt/MATLAB/R2016a/bin/matlab \< /home/run.m ' %(jobdir,jobdir)
     os.system('docker run --rm -ti --mac-address 02:42:ac:11:00:02 -v %s/Inputs:/home/Inputs -v %s/Outputs:/home/Output/ spiders/fsl_first:latest xvfb-run -a /opt/MATLAB/R2016a/bin/matlab \< /home/run.m' %(jobdir,jobdir))
-
     print '===================================================================\n'
 
 def finish_FSL_First(suffix,project,subject,session,scan,jobdir,**kwargs):
@@ -95,14 +93,10 @@ if __name__ == '__main__':
     print 'INFO: Initialisation'
     arguments=init(args)
 
-
-
     print 'INFO: Running FSL_First version 1.0.0'
     run_FSL_First(**arguments)
 
     print 'INFO: End of Spider'
     finish_FSL_First(**arguments)
 
-    #print time at the end of the spider
     print '\nTime at the end of the Spider: ', str(datetime.now())
-
